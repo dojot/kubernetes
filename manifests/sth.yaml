@@ -1,0 +1,36 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: sth
+  name: sth
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: sth
+    spec:
+      containers:
+      - env:
+        - name: DB_URI
+          value: mongodb:27017
+        - name: STH_HOST
+          value: 0.0.0.0
+        image: telefonicaiot/fiware-sth-comet
+        name: sth
+        resources: {}
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: sth
+  name: sth
+spec:
+  ports:
+  - port: 8666
+    targetPort: 8666
+  selector:
+    name: sth

@@ -1,0 +1,57 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: apigw
+  name: apigw
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        name: apigw
+    spec:
+      containers:
+      - env:
+        - name: KONG_CASSANDRA_CONTACT_POINTS
+          value: cassandra
+        - name: KONG_DATABASE
+          value: postgres
+        - name: KONG_PG_HOST
+          value: postgres
+        image: dojot/pep-kong:latest
+        name: apigw
+        ports:
+        - containerPort: 8000
+        - containerPort: 8443
+        - containerPort: 8001
+        resources: {}
+      restartPolicy: Always
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: apigw
+  name: apigw
+spec:
+  type: NodePort
+  ports:
+  - name: "8000"
+    port: 8000
+    targetPort: 8000
+  - name: "8443"
+    port: 8443
+    targetPort: 8443
+  - name: "8001"
+    port: 8001
+    targetPort: 8001
+  externalIPs:
+  - ${EXTERNAL_IP}
+  selector:
+    name: apigw
+status:
+  loadBalancer: {}
+

@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: mqtt
+  name: mqtt
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        name: mqtt
+    spec:
+      containers:
+      - image: ansi/mosquitto
+        name: mqtt
+        ports:
+        - containerPort: 1883
+        - containerPort: 8883
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: mqtt
+  name: mqtt
+spec:
+  ports:
+  - name: "1883"
+    port: 1883
+    targetPort: 1883
+  - name: "8883"
+    port: 8883
+    targetPort: 8883
+  selector:
+    name: mqtt

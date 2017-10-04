@@ -1,0 +1,34 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: mashup
+  name: mashup
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: mashup
+    spec:
+      containers:
+      - image: dojot/mashup:latest
+        name: mashup
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: mashup
+  name: mashup
+spec:
+  ports:
+  - name: "1880"
+    port: 1880
+    targetPort: 1880
+  - name: "3000"
+    port: 3000
+    targetPort: 3000
+  selector:
+    name: mashup

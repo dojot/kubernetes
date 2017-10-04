@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: device-manager
+  name: device-manager
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: device-manager
+    spec:
+      containers:
+      - image: dojot/device-manager:latest
+        name: device-manager
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: device-manager
+  name: device-manager
+spec:
+  ports:
+  - port: 5000
+    targetPort: 5000
+  selector:
+    name: device-manager

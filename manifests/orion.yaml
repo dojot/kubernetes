@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: orion
+  name: orion
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: orion
+    spec:
+      containers:
+      - args:
+        - -dbhost
+        - mongodb
+        image: dojot/fiware-orion:latest
+        name: orion
+        ports:
+        - containerPort: 1026
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: orion
+  name: orion
+spec:
+  ports:
+  - name: "1026"
+    port: 1026
+    targetPort: 1026
+  selector:
+    name: orion
+status:
+  loadBalancer: {}

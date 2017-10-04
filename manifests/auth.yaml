@@ -1,0 +1,32 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: auth
+  name: auth
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: auth
+    spec:
+      containers:
+      - image: dojot/auth
+        name: auth
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: auth
+  name: auth
+spec:
+  ports:
+  - port: 5000
+    targetPort: 5000
+  selector:
+    name: auth
+status:
+  loadBalancer: {}

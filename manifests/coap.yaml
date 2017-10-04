@@ -1,0 +1,45 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: coap
+  name: coap
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        name: coap
+    spec:
+      containers:
+      - image: telefonicaiot/lightweightm2m-iotagent:latest
+        name: coap
+        ports:
+        - containerPort: 4041
+        - containerPort: 5684
+          protocol: UDP
+        resources: {}
+      restartPolicy: Always
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: coap
+  name: coap
+spec:
+  ports:
+  - name: "internal"
+    port: 4041
+    targetPort: 4041
+  - name: "external"
+    port: 5684
+    protocol: UDP
+    targetPort: 5684
+  selector:
+    name: coap
+status:
+  loadBalancer: {}
+

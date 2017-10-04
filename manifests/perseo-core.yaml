@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: perseo-core
+  name: perseo-core
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: perseo-core
+    spec:
+      containers:
+      - args:
+        - -perseo_fe_url
+        - perseo-fe:9090
+        image: telefonicaiot/perseo-core
+        name: perseo-core
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: perseo-core
+  name: perseo-core
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    name: perseo-core
