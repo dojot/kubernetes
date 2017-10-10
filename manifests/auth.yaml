@@ -12,8 +12,17 @@ spec:
         name: auth
     spec:
       containers:
-      - image: dojot/auth
+      - image: dojot/auth:latest
         name: auth
+        env:
+        - name: DB_HOST
+          value: postgres
+        - name: DB_USER
+          value: postgres
+        - name: DB_PWD
+          value: ""
+        - name: KONG_URL
+          value: http://kong:8001
       restartPolicy: Always
 ---
 apiVersion: v1

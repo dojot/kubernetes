@@ -6,7 +6,7 @@ kong="http://kong:8001"
 echo "Waiting for auth service to be up"
 
 # Wait for auth to be up
-until $(curl --output /dev/null --silent --head --fail ${auth}); do
+until [ $(curl -X POST -w '%{http_code}\n' --fail --silent --header "content-type: application/json" -d "{}" ${auth}) -eq 400 ]; do
     printf '.'
     sleep 2
 done

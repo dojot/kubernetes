@@ -6,7 +6,6 @@ metadata:
   name: postgres
 spec:
   replicas: 1
-  strategy: {}
   template:
     metadata:
       labels:
@@ -21,8 +20,20 @@ spec:
         image: postgres:9.4
         name: postgres
         resources: {}
+        volumeMounts:
+          - name: postgres-volume
+            mountPath: /var/lib/postgresql/data
       restartPolicy: Always
-status: {}
+      volumes:
+        - name: postgres-volume
+          rbd:
+            monitors: [CEPH_MONITORS]
+            pool: rbd
+            image: postgres-volume
+            fsType: xfs
+            readOnly: false
+            user: admin
+            keyring: /etc/ceph/ceph.client.admin.keyring
 ---
 apiVersion: v1
 kind: Service
@@ -36,5 +47,3 @@ spec:
     targetPort: 5432
   selector:
     name: postgres
-status:
-  loadBalancer: {}

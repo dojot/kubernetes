@@ -6,7 +6,6 @@ metadata:
   name: mongodb
 spec:
   replicas: 1
-  strategy: {}
   template:
     metadata:
       labels:
@@ -15,8 +14,20 @@ spec:
       containers:
       - image: mongo:3.2
         name: mongodb
-        resources: {}
+        volumeMounts:
+          - name: mongo-volume
+            mountPath: /data/db
       restartPolicy: Always
+      volumes:
+        - name: mongo-volume
+          rbd:
+            monitors: [CEPH_MONITORS]
+            pool: rbd
+            image: mongo-volume
+            fsType: xfs
+            readOnly: false
+            user: admin
+            keyring: /etc/ceph/ceph.client.admin.keyring
 ---
 apiVersion: v1
 kind: Service
@@ -30,5 +41,3 @@ spec:
     targetPort: 27017
   selector:
     name: mongodb
-status:
-  loadBalancer: {}
