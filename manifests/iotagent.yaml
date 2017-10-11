@@ -40,5 +40,8 @@ spec:
   - name: "4041"
     port: 4041
     targetPort: 4041
+  - name: "8080"
+    port: 8080
+    targetPort: 8080
   selector:
     name: iotagent

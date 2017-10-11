@@ -13,8 +13,6 @@ spec:
     spec:
       containers:
       - env:
-        - name: KONG_CASSANDRA_CONTACT_POINTS
-          value: cassandra
         - name: KONG_DATABASE
           value: postgres
         - name: KONG_PG_HOST
@@ -79,8 +77,6 @@ spec:
       containers:
       - name: kong-migrate
         env:
-        - name: KONG_CASSANDRA_CONTACT_POINTS
-          value: cassandra
         - name: KONG_DATABASE
           value: postgres
         - name: KONG_PG_HOST
