@@ -21,16 +21,4 @@ spec:
         name: sth
         resources: {}
       restartPolicy: Always
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    name: sth
-  name: sth
-spec:
-  ports:
-  - port: 8666
-    targetPort: 8666
-  selector:
-    name: sth
+

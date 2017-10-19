@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kong-migrate
+spec:
+  template:
+    metadata:
+      name: kong-migrate
+    spec:
+      containers:
+      - name: kong-migrate
+        env:
+        - name: KONG_DATABASE
+          value: postgres
+        - name: KONG_PG_HOST
+          value: postgres
+        image: kong:0.11
+        args: ["kong",  "migrations", "up"]
+      restartPolicy: OnFailure

@@ -15,16 +15,3 @@ spec:
       - image: dojot/device-manager:latest
         name: device-manager
       restartPolicy: Always
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    name: devm
-  name: devm
-spec:
-  ports:
-  - port: 5000
-    targetPort: 5000
-  selector:
-    name: device-manager

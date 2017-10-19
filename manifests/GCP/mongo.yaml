@@ -1,0 +1,24 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: mongodb
+  name: mongodb
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: mongodb
+    spec:
+      containers:
+      - image: mongo:3.2
+        name: mongodb
+        volumeMounts:
+          - name: mongo-volume
+            mountPath: /data/db
+      restartPolicy: Always
+      volumes:
+        - name: mongo-volume
+          persistentVolumeClaim:
+            claimName: mongo-claim

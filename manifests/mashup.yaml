@@ -15,20 +15,3 @@ spec:
       - image: dojot/mashup:latest
         name: mashup
       restartPolicy: Always
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    name: mashup
-  name: mashup
-spec:
-  ports:
-  - name: "1880"
-    port: 1880
-    targetPort: 1880
-  - name: "3000"
-    port: 3000
-    targetPort: 3000
-  selector:
-    name: mashup

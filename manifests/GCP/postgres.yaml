@@ -1,0 +1,32 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: postgres
+  name: postgres
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: postgres
+    spec:
+      containers:
+      - env:
+        - name: POSTGRES_DB
+          value: kong
+        - name: POSTGRES_USER
+          value: kong
+        - name: PGDATA
+          value: /var/lib/postgresql/data/data
+        image: postgres:9.4
+        name: postgres
+        resources: {}
+        volumeMounts:
+          - name: postgres-volume
+            mountPath: /var/lib/postgresql/data
+      restartPolicy: Always
+      volumes:
+        - name: postgres-volume
+          persistentVolumeClaim:
+            claimName: postgres-claim

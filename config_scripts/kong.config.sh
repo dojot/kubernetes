@@ -173,3 +173,4 @@ PAYLOAD
 # no auth: used for middleware <-> device communication via HTTP(s)
 
 echo "API Gateway Paths configured"
+

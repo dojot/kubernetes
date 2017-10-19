@@ -10,6 +10,7 @@ spec:
     metadata:
       labels:
         name: kong
+        app: external
     spec:
       containers:
       - env:
@@ -25,62 +26,3 @@ spec:
         - containerPort: 8001
       restartPolicy: Always
 status: {}
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    name: kong
-  name: kong
-spec:
-  ports:
-  - name: "8000"
-    port: 8000
-    targetPort: 8000
-  - name: "8443"
-    port: 8443
-    targetPort: 8443
-  - name: "8001"
-    port: 8001
-    targetPort: 8001
-  selector:
-    name: kong
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    name: kong-external
-  name: kong-external
-spec:
-  ports:
-  - name: "ext-8000"
-    port: 8000
-    targetPort: 8000
-  - name: "ext-8443"
-    port: 8443
-    targetPort: 8443
-  externalIPs:
-  - [EXTERNAL_IP]
-  selector:
-    name: kong
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: kong-migrate
-spec:
-  template:
-    metadata:
-      name: kong-migrate
-    spec:
-      containers:
-      - name: kong-migrate
-        env:
-        - name: KONG_DATABASE
-          value: postgres
-        - name: KONG_PG_HOST
-          value: postgres
-        image: kong:0.11
-        args: ["kong",  "migrations", "up"]
-      restartPolicy: OnFailure

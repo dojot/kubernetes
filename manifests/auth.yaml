@@ -24,18 +24,3 @@ spec:
         - name: KONG_URL
           value: http://kong:8001
       restartPolicy: Always
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    name: auth
-  name: auth
-spec:
-  ports:
-  - port: 5000
-    targetPort: 5000
-  selector:
-    name: auth
-status:
-  loadBalancer: {}

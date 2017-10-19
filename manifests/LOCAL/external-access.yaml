@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: external
+  name: external
+spec:
+  ports:
+  - name: "ext-8000"
+    port: 80
+    targetPort: 8000
+  - name: "ext-8443"
+    port: 443
+    targetPort: 8443
+  - name: "ext-mqtt"
+    port: 1883
+    targetPort: 1883
+  externalIPs:
+  - [EXTERNAL_IP]
+  selector:
+    app: external

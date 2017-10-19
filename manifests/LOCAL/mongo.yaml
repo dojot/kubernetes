@@ -28,16 +28,3 @@ spec:
             readOnly: false
             user: admin
             keyring: /etc/ceph/ceph.client.admin.keyring
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    name: mongodb
-  name: mongodb
-spec:
-  ports:
-  - port: 27017
-    targetPort: 27017
-  selector:
-    name: mongodb
