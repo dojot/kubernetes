@@ -20,7 +20,7 @@ fi
 DEPLOY_TYPE=$1
 
 if [ ${DEPLOY_TYPE} = "LOCAL" ]; then
-    if [ S# -lt 3 ]; then
+    if [ $# -lt 3 ]; then
         print_error
     fi
 
@@ -32,7 +32,7 @@ if [ ${DEPLOY_TYPE} = "LOCAL" ]; then
     TAG=${4:-latest}
 
     # Update the external ip on the yaml files
-    sed -i "s/\[EXTERNAL_IP\]/${EXTERNAL_IP}/g" manifests/LOCAL/apigw.yaml
+    sed -i "s/\[EXTERNAL_IP\]/${EXTERNAL_IP}/g" manifests/LOCAL/external-access.yaml
     # Update the tag of the containers
     sed -i -r "s/(dojot\/[a-zA-Z\-]+).*/\1:${TAG}/g" manifests/*.yaml
     # Update the ceph monitor adresses for the volumes
@@ -55,11 +55,11 @@ if [ ${DEPLOY_TYPE} = "LOCAL" ]; then
     kubectl create -n dojot configmap create-admin-user --from-file=config_scripts/create-admin-user.sh
 
     # Deploy Dojot services
-    kubectl create -n dojot -f manifests/LOCAL/*.yaml
-    kubectl create -n dojot -f manifests/*.yaml
-
+    kubectl create -n dojot -f manifests/LOCAL/
+    kubectl create -n dojot -f manifests/
     # Changes the external ip back to a placeholder
-    sed -i "s/${EXTERNAL_IP}/\[EXTERNAL_IP\]/g" manifests/LOCAL/apigw.yaml
+    sed -i "s/${EXTERNAL_IP}/\[EXTERNAL_IP\]/g" manifests/LOCAL/external-access.yaml
+    sed -i "s/monitors:.*/monitors: \[CEPH_MONITORS\]/g" manifests/LOCAL/*.yaml
 
 elif [ ${DEPLOY_TYPE} = "GCP" ]; then
     TAG=${2:-latest}
