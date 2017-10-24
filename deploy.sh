@@ -27,7 +27,7 @@ if [ ${DEPLOY_TYPE} = "LOCAL" ]; then
     # Read the external ip
     EXTERNAL_IP=$2
     # Get the mon list from the ceph.conf file
-    CEPH_MON_IPS=$(grep mon_host ${3} | egrep -o "[0-9\.\,]+" | sed -r "s/[0-9\.]+/'\0:6789'/g")
+    CEPH_MON_IPS=$(grep mon_host ${3} | egrep -o "[0-9\.\,]+" | sed -r "s/[0-9\.]+/\0:6789/g")
     # Read the tag value, if not set, use the default value "latest"
     TAG=${4:-latest}
 
@@ -36,15 +36,7 @@ if [ ${DEPLOY_TYPE} = "LOCAL" ]; then
     # Update the tag of the containers
     sed -i -r "s/(dojot\/[a-zA-Z\-]+).*/\1:${TAG}/g" manifests/*.yaml
     # Update the ceph monitor adresses for the volumes
-    sed -i "s/\[CEPH_MONITORS\]/\[${CEPH_MON_IPS}\]/g" manifests/LOCAL/*.yaml
-
-    # Create the volume images on Ceph
-    rbd create postgres-volume --size 50G
-    rbd create mongo-volume --size 250G
-
-    # Disable some features not available on Ubuntu 16.04 Kernel
-    rbd feature disable postgres-volume exclusive-lock, object-map, fast-diff, deep-flatten
-    rbd feature disable mongo-volume exclusive-lock, object-map, fast-diff, deep-flatten
+    sed -i -r "s/\[CEPH_MONITORS\]/${CEPH_MON_IPS}/g" manifests/LOCAL/*.yaml
 
     # Create the dojot namespace
     kubectl create namespace dojot
@@ -55,7 +47,11 @@ if [ ${DEPLOY_TYPE} = "LOCAL" ]; then
     kubectl create -n dojot configmap create-admin-user --from-file=config_scripts/create-admin-user.sh
 
     # Deploy Dojot services
-    kubectl create -n dojot -f manifests/LOCAL/
+    kubectl create -n dojot -f manifests/LOCAL/ceph-secret-user.yaml
+    kubectl create -n kube-system -f manifests/LOCAL/ceph-secret-admin.yaml
+    kubectl create -f manifests/LOCAL/standard-storage-class.yaml
+    kubectl create -f manifests/LOCAL/rbd-provisioner.yaml
+    kubectl create -n dojot -f manifests/LOCAL/external-access.yaml
     kubectl create -n dojot -f manifests/
     # Changes the external ip back to a placeholder
     sed -i "s/${EXTERNAL_IP}/\[EXTERNAL_IP\]/g" manifests/LOCAL/external-access.yaml

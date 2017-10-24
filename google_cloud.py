@@ -43,12 +43,12 @@ DEPLOYMENTS_LIST = [
     'gui.yaml',
     'iotagent.yaml',
     'mashup.yaml',
-    'GCP/mongo.yaml',
+    'mongo.yaml',
     'mqtt.yaml',
     'orion.yaml',
     'perseo-core.yaml',
     'perseo-fe.yaml',
-    'GCP/postgres.yaml',
+    'postgres.yaml',
     'sth.yaml'
 ]
 
@@ -77,8 +77,8 @@ JOBS_LIST = [
 ]
 
 VOLUMES_LIST = [
-    'GCP/mongo-volume.yaml',
-    'GCP/postgres-volume.yaml'
+    'mongo-volume.yaml',
+    'postgres-volume.yaml'
 ]
 
 app.secret_key = '\x8a\x17\xebrC\xe5a\xb5\x0f:0\x8b\xd6\xed\xb3L\xe5lH\xbc2w\xd6L'
