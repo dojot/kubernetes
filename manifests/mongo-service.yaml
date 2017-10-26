@@ -4,6 +4,7 @@ metadata:
   labels:
     name: mongodb
   name: mongodb
+  namespace: dojot
 spec:
   ports:
   - port: 27017

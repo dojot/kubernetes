@@ -1,0 +1,13 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: mongo-cluster-role-1
+  namespace: dojot
+subjects:
+- kind: ServiceAccount
+  name: mongodb
+  namespace: dojot
+roleRef:
+  kind: ClusterRole
+  name: mongo-cluster-role
+  apiGroup: rbac.authorization.k8s.io

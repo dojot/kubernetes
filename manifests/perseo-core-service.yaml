@@ -4,6 +4,7 @@ metadata:
   labels:
     name: perseo-core
   name: perseo-core
+  namespace: dojot
 spec:
   ports:
   - port: 8080

@@ -36,7 +36,7 @@ if [ ${STORAGE_TYPE} = "CEPH" ]; then
     # Update the ceph monitor adresses for the volumes
     sed -i -r "s/\[CEPH_MONITORS\]/${CEPH_MON_IPS}/g" manifests/STORAGE/CEPH/dojot-storage-class.yaml
 
-    kubectl create -n dojot -f manifests/STORAGE/CEPH/ceph-secret-user.yaml
+    kubectl create -f manifests/STORAGE/CEPH/ceph-secret-user.yaml
     kubectl create -n kube-system -f manifests/STORAGE/CEPH/ceph-secret-admin.yaml
     kubectl create -f manifests/STORAGE/CEPH/dojot-storage-class.yaml
 
@@ -57,14 +57,14 @@ if [ ${EXTERNAL_ACCESS_TYPE} = "PUBLIC_IP" ]; then
     # Update the public ip
     sed -i "s/\[EXTERNAL_IP\]/${public_ip}/g" manifests/EXTERNAL_ACCESS/public-ip.yaml
 
-    kubectl create -n dojot -f manifests/EXTERNAL_ACCESS/public-ip.yaml
+    kubectl create -f manifests/EXTERNAL_ACCESS/public-ip.yaml
 
     # Changes the external ip back to a placeholder
     sed -i "s/${public_ip}/\[EXTERNAL_IP\]/g" manifests/EXTERNAL_ACCESS/public-ip.yaml
 
 elif [ ${EXTERNAL_ACCESS_TYPE} = "LB" ]; then
 
-    kubectl create -n dojot -f manifests/EXTERNAL_ACCESS/load-balancer.yaml
+    kubectl create -f manifests/EXTERNAL_ACCESS/load-balancer.yaml
 
 else
     print_error
@@ -82,7 +82,7 @@ kubectl create -n dojot configmap create-admin-user --from-file=config_scripts/c
 kubectl create -n dojot configmap postgres-init --from-file=config_scripts/postgres-init.sh
 
 # Deploy Dojot services
-kubectl create -n dojot -f manifests/
+kubectl create -f manifests/
 
 # Wait for redis cluster to be bootstrapped
 until kubectl rollout status deployments redis -n dojot | grep successfully

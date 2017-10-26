@@ -4,6 +4,7 @@ metadata:
   labels:
     name: external
   name: external
+  namespace: dojot
 spec:
   ports:
   - name: "ext-8000"

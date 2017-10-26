@@ -4,6 +4,7 @@ metadata:
   labels:
     name: mashup
   name: mashup
+  namespace: dojot
 spec:
   ports:
   - name: "1880"

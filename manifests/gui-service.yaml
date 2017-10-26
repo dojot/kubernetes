@@ -4,6 +4,7 @@ metadata:
   labels:
     name: gui
   name: gui
+  namespace: dojot
 spec:
   ports:
   - name: "http"
