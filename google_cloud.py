@@ -49,7 +49,16 @@ DEPLOYMENTS_LIST = [
     'perseo-core.yaml',
     'perseo-fe.yaml',
     'postgres.yaml',
+    'redis-cluster.yaml',
     'sth.yaml'
+]
+
+PODS_LIST = [
+    'redis-bootstrap.yaml'
+]
+
+REPLICATION_CONTROLLERS = [
+    'redis-sentinel-cluster.yaml'
 ]
 
 SERVICES_LIST = [
@@ -67,6 +76,7 @@ SERVICES_LIST = [
     'perseo-core-service.yaml',
     'perseo-fe-service.yaml',
     'postgres-service.yaml',
+    'redis-sentinel-service.yaml',
     'sth-service.yaml'
 ]
 
@@ -283,6 +293,7 @@ def cluster_creation(project_id):
     api_client = config.new_client_from_config(config_file='client_config')
 
     api_instance = client.CoreV1Api(api_client=api_client)
+    api_instance_apps = client.AppsV1beta1Api(api_client=api_client)
     api_instance_beta = client.ExtensionsV1beta1Api(api_client=api_client)
     api_instance_batch = client.BatchV1Api(api_client=api_client)
 
@@ -318,6 +329,26 @@ def cluster_creation(project_id):
         cmap.metadata = client.V1ObjectMeta(name="create-admin-user")
         cmap.data = {"create-admin-user.sh": open('config_scripts/create-admin-user.sh').read()}
         api_instance.create_namespaced_config_map(namespace="dojot", body=cmap)
+
+    for pod in PODS_LIST:
+        with open("manifests/" + pod) as f:
+            dep = yaml.load(f)
+
+            object_name = dep['metadata']['name']
+            try:
+                api_instance.read_namespaced_pod(name=object_name, namespace="dojot")
+            except ApiException:
+                api_instance.create_namespaced_pod(body=dep, namespace="dojot")
+
+    for rc in REPLICATION_CONTROLLERS:
+        with open("manifests/" + rc) as f:
+            dep = yaml.load(f)
+
+            object_name = dep['metadata']['name']
+            try:
+                api_instance.read_namespaced_replication_controller(name=object_name, namespace="dojot")
+            except ApiException:
+                api_instance.create_namespaced_replication_controller(body=dep, namespace="dojot")
 
     for volume in VOLUMES_LIST:
         with open("manifests/" + volume) as f:
@@ -380,6 +411,20 @@ def cluster_creation(project_id):
             all_succeeded = True
 
     print("Jobs completed")
+
+    ready = False
+
+    while not ready:
+        redis_status = api_instance_apps.read_namespaced_deployment_status(name="redis", namespace="dojot")
+
+        if redis_status.status.ready_replicas == redis_status.status.replicas:
+            ready = True
+        else:
+            time.sleep(2)
+
+    time.sleep(10)
+
+    api_instance.delete_namespaced_pod(name="redis-bootstrap", namespace="dojot", body={})
 
     external_service = api_instance.read_namespaced_service(name="external", namespace="dojot")
 

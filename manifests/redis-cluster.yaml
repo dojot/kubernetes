@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: redis
+  name: redis
+  namespace: dojot
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        name: redis
+    spec:
+      containers:
+      - name: redis
+        image: kubernetes/redis:v1
+        ports:
+        - containerPort: 6379

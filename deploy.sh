@@ -53,6 +53,23 @@ if [ ${DEPLOY_TYPE} = "LOCAL" ]; then
     kubectl create -f manifests/LOCAL/rbd-provisioner.yaml
     kubectl create -n dojot -f manifests/LOCAL/external-access.yaml
     kubectl create -n dojot -f manifests/
+
+    # Wait for redis cluster to be bootstrapped
+    until kubectl rollout status deployments redis -n dojot | grep successfully
+    do
+      sleep 1
+    done
+
+    slaves=$(kubectl -n dojot exec redis-bootstrap -- redis-cli info | grep connected_slaves | cut -d ':' -f 2 | cut -c 1)
+
+    until [ ${slaves} == "3" ];
+    do
+      sleep 2
+      slaves=$(kubectl -n dojot exec redis-bootstrap -- redis-cli info | grep connected_slaves | cut -d ':' -f 2 | cut -c 1)
+    done
+
+    kubectl delete -n dojot pod redis-bootstrap
+
     # Changes the external ip back to a placeholder
     sed -i "s/${EXTERNAL_IP}/\[EXTERNAL_IP\]/g" manifests/LOCAL/external-access.yaml
     sed -i "s/monitors:.*/monitors: \[CEPH_MONITORS\]/g" manifests/LOCAL/*.yaml
