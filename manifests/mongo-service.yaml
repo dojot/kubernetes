@@ -6,6 +6,7 @@ metadata:
   name: mongodb
   namespace: dojot
 spec:
+  clusterIP: None
   ports:
   - port: 27017
     targetPort: 27017

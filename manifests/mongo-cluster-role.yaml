@@ -1,7 +1,7 @@
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: mongo-cluster-role
+  name: mongo-role
   namespace: dojot
 rules:
 - apiGroups: [""]
