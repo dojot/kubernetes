@@ -47,7 +47,7 @@ spec:
         namespace: dojot
       spec:
         accessModes: [ "ReadWriteOnce" ]
-        storageClassName: standard
+        storageClassName: dojot
         resources:
           requests:
             storage: 2Gi

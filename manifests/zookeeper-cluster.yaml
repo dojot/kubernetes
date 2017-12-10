@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta2
+apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
   name: zk
@@ -87,7 +87,7 @@ spec:
       namespace: dojot
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: standard
+      storageClassName: dojot
       resources:
         requests:
           storage: 1Gi
