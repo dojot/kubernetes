@@ -5,6 +5,8 @@ metadata:
   namespace: kube-system
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
@@ -12,7 +14,10 @@ spec:
     spec:
       containers:
       - name: rbd-provisioner
-        image: "quay.io/external_storage/rbd-provisioner:v0.1.0"
+        image: "quay.io/external_storage/rbd-provisioner:latest"
+        env:
+        - name: PROVISIONER_NAME
+          value: ceph.com/rbd
       serviceAccountName: rbd-provisioner
 ---
 kind: ServiceAccount
@@ -21,95 +26,55 @@ metadata:
   name: rbd-provisioner
   namespace: kube-system
 ---
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: rbd-provisioner-role1
-subjects:
-- kind: ServiceAccount
-  name: rbd-provisioner
-  namespace: kube-system
-roleRef:
-  kind: ClusterRole
-  name: system:controller:persistent-volume-binder
-  apiGroup: rbac.authorization.k8s.io
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: rbd-provisioner-role2
-subjects:
-- kind: ServiceAccount
-  name: rbd-provisioner
-  namespace: kube-system
-roleRef:
-  kind: ClusterRole
-  name: system:persistent-volume-provisioner
-  apiGroup: rbac.authorization.k8s.io
----
 kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: rbd-provisioner
   namespace: dojot
 ---
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: rbd-provisioner-role3
-subjects:
-- kind: ServiceAccount
-  name: rbd-provisioner
-  namespace: dojot
-roleRef:
-  kind: ClusterRole
-  name: system:controller:persistent-volume-binder
-  apiGroup: rbac.authorization.k8s.io
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: rbd-provisioner-role4
-subjects:
-- kind: ServiceAccount
-  name: rbd-provisioner
-  namespace: dojot
-roleRef:
-  kind: ClusterRole
-  name: system:persistent-volume-provisioner
-  apiGroup: rbac.authorization.k8s.io
----
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: rbd-provisioner-event-role
+  name: rbd-provisioner
 rules:
-- apiGroups: [""]
-  resources: ["events"]
-  verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "update"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["list", "watch", "create", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: rbd-provisioner-role5
+  name: rbd-provisioner-1
 subjects:
-- kind: ServiceAccount
-  name: rbd-provisioner
-  namespace: dojot
+  - kind: ServiceAccount
+    name: rbd-provisioner
+    namespace: kube-system
 roleRef:
   kind: ClusterRole
-  name: rbd-provisioner-event-role
+  name: rbd-provisioner
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: rbd-provisioner-role6
+  name: rbd-provisioner-2
 subjects:
-- kind: ServiceAccount
-  name: rbd-provisioner
-  namespace: kube-system
+  - kind: ServiceAccount
+    name: rbd-provisioner
+    namespace: dojot
 roleRef:
   kind: ClusterRole
-  name: rbd-provisioner-event-role
+  name: rbd-provisioner
   apiGroup: rbac.authorization.k8s.io
