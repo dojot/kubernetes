@@ -10,11 +10,5 @@ spec:
   - name: "internal"
     port: 4041
     targetPort: 4041
-  - name: "external"
-    port: 5684
-    protocol: UDP
-    targetPort: 5684
   selector:
     name: coap
-status:
-  loadBalancer: {}

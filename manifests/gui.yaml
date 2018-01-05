@@ -7,7 +7,6 @@ metadata:
   namespace: dojot
 spec:
   replicas: 1
-  strategy: {}
   template:
     metadata:
       labels:
@@ -16,5 +15,4 @@ spec:
       containers:
       - image: dojot/gui:latest
         name: gui
-        resources: {}
       restartPolicy: Always

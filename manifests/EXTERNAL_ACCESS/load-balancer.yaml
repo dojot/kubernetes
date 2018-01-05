@@ -17,5 +17,9 @@ spec:
   - name: "ext-mqtt"
     port: 1883
     targetPort: 1883
+  - name: "ext-coap"
+    port: 5684
+    protocol: UDP
+    targetPort: 5684
   selector:
     app: external

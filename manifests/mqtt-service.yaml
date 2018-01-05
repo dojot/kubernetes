@@ -6,12 +6,10 @@ metadata:
   name: mqtt
   namespace: dojot
 spec:
+  # TODO: Change the port to 8883 for TLS support
   ports:
   - name: "1883"
     port: 1883
     targetPort: 1883
-  - name: "8883"
-    port: 8883
-    targetPort: 8883
   selector:
     name: mqtt

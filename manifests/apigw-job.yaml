@@ -20,6 +20,6 @@ spec:
         # TODO: Get this value from a secret
         - name: KONG_PG_PASSWORD
           value: kong
-        image: kong:0.11
+        image: dojot/kong:latest
         args: ["kong",  "migrations", "up"]
       restartPolicy: OnFailure

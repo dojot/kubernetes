@@ -7,8 +7,6 @@ metadata:
   namespace: dojot
 spec:
   replicas: 1
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
@@ -16,14 +14,16 @@ spec:
     spec:
       containers:
       - image: dojot/iotagent-json:latest
-        command:
-        - bin/iotagent-json
-        - config/config.js
+        args:
+        - config/config.json
         name: iotagent
         resources: {}
         volumeMounts:
         - mountPath: /opt/iotajson/config
           name: iotagent-conf
+        env:
+        - name: MQTT_TLS
+          value: "false"
       restartPolicy: Always
       volumes:
       - name: iotagent-conf

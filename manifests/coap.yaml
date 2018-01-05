@@ -7,11 +7,11 @@ metadata:
   namespace: dojot
 spec:
   replicas: 1
-  strategy: {}
   template:
     metadata:
       labels:
         name: coap
+        app: external
     spec:
       containers:
       - image: telefonicaiot/lightweightm2m-iotagent:latest
@@ -20,6 +20,4 @@ spec:
         - containerPort: 4041
         - containerPort: 5684
           protocol: UDP
-        resources: {}
       restartPolicy: Always
-status: {}

@@ -16,16 +16,16 @@ echo
 echo "Kong is up, configuring routes"
 
 authConfig() {
-  curl -o /dev/null -sS -X POST $kong/apis/$1/plugins -d "name=jwt" # -d "config.claims_to_verify=exp"
-  curl -o /dev/null -sS -X POST $kong/apis/$1/plugins -d "name=pepkong" -d "config.pdpUrl=http://pdp-ws:9763"
+  curl -o /dev/null -sS -X POST ${kong}/apis/$1/plugins -d "name=jwt" # -d "config.claims_to_verify=exp"
+  curl -o /dev/null -sS -X POST ${kong}/apis/$1/plugins -d "name=pepkong" -d "config.pdpUrl=http://auth:5000/pdp"
 }
 
 # remove all previously configured apis from gateway
 for i in $(curl -sS ${kong}/apis  | grep -oP '(?<="id":")[a-f0-9-]+(?=")'); do
-  curl -o /dev/null -sS -X DELETE $kong/apis/$i
+  curl -o /dev/null -sS -X DELETE ${kong}/apis/$i
 done
 
-(curl -o /dev/null $kong/apis -sS -X PUT \
+(curl -o /dev/null ${kong}/apis -sS -X PUT \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -37,7 +37,7 @@ done
 PAYLOAD
 # no auth: serves only static front-end content
 
-(curl -o /dev/null $kong/apis -sS -X POST \
+(curl -o /dev/null ${kong}/apis -sS -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -50,7 +50,7 @@ PAYLOAD
 authConfig "metric"
 
 
-(curl -o /dev/null $kong/apis -s -S -X POST \
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -63,7 +63,7 @@ PAYLOAD
 authConfig "template"
 
 
-(curl -o /dev/null $kong/apis -s -S -X POST \
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -95,7 +95,7 @@ curl -o /dev/null -sS -X POST ${kong}/apis/auth-service/plugins \
 
 
 # revoke all tokens: maintence only API
-(curl -o /dev/null $kong/apis -s -S -X POST \
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -105,13 +105,13 @@ curl -o /dev/null -sS -X POST ${kong}/apis/auth-service/plugins \
     "upstream_url": "http://auth:5000/auth/revoke"
 }
 PAYLOAD
-curl -o /dev/null -sS -X POST  $kong/apis/auth-revoke/plugins \
+curl -o /dev/null -sS -X POST  ${kong}/apis/auth-revoke/plugins \
     --data "name=request-termination" \
     --data "config.status_code=403" \
     --data "config.message=Not authorized"
 
 
-(curl -o /dev/null $kong/apis -s -S -X POST \
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -123,7 +123,7 @@ curl -o /dev/null -sS -X POST  $kong/apis/auth-revoke/plugins \
 PAYLOAD
 authConfig "user-service"
 
-(curl -o /dev/null $kong/apis -s -S -X POST \
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -135,7 +135,7 @@ authConfig "user-service"
 PAYLOAD
 authConfig "flows"
 
-(curl -o /dev/null $kong/apis -s -S -X POST \
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -148,7 +148,7 @@ PAYLOAD
 authConfig "history"
 
 # TODO it might be a good idea to merge this with the orchestrator itself
-(curl -o /dev/null $kong/apis -s -S -X POST \
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -160,7 +160,7 @@ authConfig "history"
 PAYLOAD
 # no auth: serves only available types
 
-(curl -o /dev/null $kong/apis -s -S -X POST \
+(curl -o /dev/null ${kong}/apis -s -S -X POST \
     --header "Content-Type: application/json" \
     -d @- ) <<PAYLOAD
 {
@@ -172,5 +172,17 @@ PAYLOAD
 PAYLOAD
 # no auth: used for middleware <-> device communication via HTTP(s)
 
-echo "API Gateway Paths configured"
+# CA certificate retrievemment and certificate sign requests
+(curl -o /dev/null ${kong}/apis -sS -X POST \
+    --header "Content-Type: application/json" \
+    -d @- ) <<PAYLOAD
+{
+     "name": "ejbca-paths",
+     "uris": [ "/sign", "/ca"],
+     "strip_uri": false,
+     "upstream_url": "http://ejbca:5583/"
+ }
+PAYLOAD
+authConfig "ejbca-paths"
 
+echo "API Gateway Paths configured"

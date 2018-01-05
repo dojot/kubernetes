@@ -15,4 +15,10 @@ spec:
       containers:
       - image: dojot/device-manager:latest
         name: device-manager
+        env:
+        # TODO: Change this to a secret
+        - name: DBPASS
+          value: "kong"
+        - name: KAFKA_HOST
+          value: "kafka-server"
       restartPolicy: Always

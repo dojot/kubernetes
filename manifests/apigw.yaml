@@ -14,21 +14,34 @@ spec:
         app: external
     spec:
       containers:
-      - env:
+      - name: kong
+        image: dojot/kong:latest
+        env:
         - name: KONG_DATABASE
-          value: postgres
+          value: "postgres"
         - name: KONG_PG_HOST
-          value: postgres
+          value: "postgres"
         - name: KONG_PG_USER
-          value: postgres
+          value: "postgres"
         # TODO: Get this from a secret
         - name: KONG_PG_PASSWORD
-          value: kong
-        image: kong:0.11
-        name: kong
+          value: "kong"
         ports:
         - containerPort: 8000
         - containerPort: 8443
         - containerPort: 8001
+        volumeMounts:
+        - mountPath: /plugins/pep-kong
+          name: pep-kong-plugin
+        - mountPath: /plugins/ma-plugin
+          name: ma-plugin
       restartPolicy: Always
-status: {}
+      volumes:
+      - name: pep-kong-plugin
+        gitRepo:
+          repository: "https://github.com/dojot/pep-kong.git"
+          revision: "master"
+      - name: ma-plugin
+        gitRepo:
+          repository: "https://github.com/dojot/ma-kong-plugin.git"
+          revision: "master"

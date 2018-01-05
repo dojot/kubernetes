@@ -7,8 +7,6 @@ metadata:
   namespace: dojot
 spec:
   replicas: 1
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
@@ -16,9 +14,11 @@ spec:
         app: external
     spec:
       containers:
+      # TODO: Change the image to dojot/mqtt-manager for TLS support
       - image: ansi/mosquitto
         name: mqtt
         ports:
+        # TODO: Change the port to 8883 for TLS support
         - containerPort: 1883
-        - containerPort: 8883
       restartPolicy: Always
+      # TODO: Add configuration file volume for TLS support

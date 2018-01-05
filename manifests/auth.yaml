@@ -16,13 +16,17 @@ spec:
       - image: dojot/auth:latest
         name: auth
         env:
-        - name: DB_HOST
+        - name: AUTH_DB_HOST
           value: postgres
-        - name: DB_USER
+        - name: AUTH_DB_USER
           value: postgres
-        - name: DB_PWD
+        - name: AUTH_DB_PWD
         # TODO: Set this as a secret
           value: kong
-        - name: KONG_URL
+        - name: AUTH_KONG_URL
           value: http://kong:8001
+        - name: AUTH_CACHE_NAME
+          value: "redis"
+        - name: AUTH_CACHE_HOST
+          value: "redis"
       restartPolicy: Always

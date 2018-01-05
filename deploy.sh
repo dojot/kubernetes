@@ -1,5 +1,7 @@
 #!/bin/bash
 
+TAG=latest
+
 function print_error {
     cat <<-EOF
 Usage: ./deploy.sh STORAGE_TYPE EXTERNAL_ACCESS_TYPE
@@ -10,7 +12,7 @@ The storage that will be used for deployment must be selected from the following
 The external access must be selected from the following options, PUBLIC_IP or LB
  - If public ip is selected you will be prompted for the ip address to be used
 
-The dojot version that will be deployed is the 0.2.0-nightly-20171010
+The dojot version that will be deployed is the ${TAG} version
 EOF
     exit
 }
@@ -70,21 +72,19 @@ else
     print_error
 fi
 
-TAG=0.2.0-nightly20171010
-
 # Update the tag of the containers
-sed -i -r "s/(dojot\/[a-zA-Z\-]+).*/\1:${TAG}/g" manifests/*.yaml
+sed -i -r "s/( dojot\/[a-zA-Z\-]+).*/\1:${TAG}/g" manifests/*.yaml
 
 # Create configuration files mappings
-kubectl create -n dojot configmap iotagent-conf --from-file=iotagent/config.js
+kubectl create -n dojot configmap iotagent-conf --from-file=iotagent/config.json
 kubectl create -n dojot configmap kong-route-config --from-file=config_scripts/kong.config.sh
-kubectl create -n dojot configmap create-admin-user --from-file=config_scripts/create-admin-user.sh
 kubectl create -n dojot configmap postgres-init --from-file=config_scripts/postgres-init.sh
 
 # Deploy Dojot services
 kubectl create -f manifests/
 
 # Wait for redis cluster to be bootstrapped
+# TODO: Move this bootstrap cleanup to a job running on the cluster to avoid blocking the cli
 until kubectl rollout status deployments redis -n dojot | grep successfully
 do
   sleep 1

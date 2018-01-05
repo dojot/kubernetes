@@ -15,9 +15,11 @@ spec:
       containers:
       - env:
         - name: DB_URI
-          value: mongodb:27017
+          value: "mongodb:27017"
         - name: STH_HOST
-          value: 0.0.0.0
+          value: "0.0.0.0"
+        - name: REPLICA_SET
+          value: "rs0"
         image: telefonicaiot/fiware-sth-comet
         name: sth
         resources: {}
