@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: kafka-server
+  name: kafka-server
+  namespace: dojot
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: kafka-server
+    spec:
+      containers:
+      - image: ches/kafka:0.10.1.1
+        name: kafka-server
+        ports:
+        - containerPort: 9092
+        env:
+        - name: ZOOKEEPER_IP
+          value: "zk-client"
+        # TODO: Take a better look at this configuration
+        - name: KAFKA_NUM_PARTITIONS
+          value: "10"
+      restartPolicy: Always
