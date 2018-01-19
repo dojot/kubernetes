@@ -11,7 +11,7 @@ spec:
     metadata:
       labels:
         name: mqtt
-        app: external
+        app: external-mqtt
     spec:
       containers:
       # TODO: Change the image to dojot/mqtt-manager for TLS support

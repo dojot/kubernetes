@@ -16,6 +16,8 @@ spec:
       - args:
         - -dbhost
         - mongodb
+        - -rplSet
+        - rs0
         image: dojot/fiware-orion:latest
         name: orion
         ports:

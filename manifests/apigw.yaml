@@ -11,7 +11,7 @@ spec:
     metadata:
       labels:
         name: kong
-        app: external
+        app: external-kong
     spec:
       containers:
       - name: kong

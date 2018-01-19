@@ -17,9 +17,8 @@ spec:
         args:
         - config/config.json
         name: iotagent
-        resources: {}
         volumeMounts:
-        - mountPath: /opt/iotajson/config
+        - mountPath: /opt/iotagent-json/config
           name: iotagent-conf
         env:
         - name: MQTT_TLS

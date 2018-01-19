@@ -11,7 +11,7 @@ spec:
     metadata:
       labels:
         name: coap
-        app: external
+        app: external-coap
     spec:
       containers:
       - image: telefonicaiot/lightweightm2m-iotagent:latest

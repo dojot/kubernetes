@@ -2,8 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    name: external
-  name: external
+    name: external-kong
+  name: external-kong
   namespace: dojot
 spec:
   type: LoadBalancer
@@ -14,12 +14,38 @@ spec:
   - name: "ext-8443"
     port: 443
     targetPort: 8443
+  selector:
+    app: external-kong
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: external-mqtt
+  name: external-mqtt
+  namespace: dojot
+spec:
+  type: LoadBalancer
+  ports:
   - name: "ext-mqtt"
     port: 1883
     targetPort: 1883
+  selector:
+    app: external-mqtt
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: external-coap
+  name: external-coap
+  namespace: dojot
+spec:
+  type: LoadBalancer
+  ports:
   - name: "ext-coap"
     port: 5684
     protocol: UDP
     targetPort: 5684
   selector:
-    app: external
+    app: external-coap

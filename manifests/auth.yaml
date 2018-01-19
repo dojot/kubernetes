@@ -28,5 +28,16 @@ spec:
         - name: AUTH_CACHE_NAME
           value: "redis"
         - name: AUTH_CACHE_HOST
-          value: "redis"
+          value: "localhost"
+        # TODO: All email data should be set as secrets
+        - name: AUTH_EMAIL_HOST
+          value: "smtp.email.com.br"
+        - name: AUTH_EMAIL_USER
+          value: "username@email.com.br"
+        - name: AUTH_EMAIL_PASSWD
+          value: "password"
+      - image: redis
+        name: redis
+        ports:
+        - containerPort: 6379
       restartPolicy: Always

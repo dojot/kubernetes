@@ -83,21 +83,4 @@ kubectl create -n dojot configmap postgres-init --from-file=config_scripts/postg
 # Deploy Dojot services
 kubectl create -f manifests/
 
-# Wait for redis cluster to be bootstrapped
-# TODO: Move this bootstrap cleanup to a job running on the cluster to avoid blocking the cli
-until kubectl rollout status deployments redis -n dojot | grep successfully
-do
-  sleep 1
-done
-
-slaves=$(kubectl -n dojot exec redis-bootstrap -- redis-cli info | grep connected_slaves | cut -d ':' -f 2 | cut -c 1)
-
-until [ ${slaves} == "3" ];
-do
-  sleep 2
-  slaves=$(kubectl -n dojot exec redis-bootstrap -- redis-cli info | grep connected_slaves | cut -d ':' -f 2 | cut -c 1)
-done
-
-kubectl delete -n dojot pod redis-bootstrap
-
 echo Deployment is complete!
