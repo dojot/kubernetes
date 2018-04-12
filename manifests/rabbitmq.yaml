@@ -1,36 +1,133 @@
+---
 apiVersion: v1
-kind: Service
+kind: ServiceAccount
 metadata:
-  labels:
-    name: rabbitmq
   name: rabbitmq
   namespace: dojot
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: endpoint-reader
+  namespace: dojot
+rules:
+- apiGroups: [""]
+  resources: ["endpoints"]
+  verbs: ["get"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: endpoint-reader
+  namespace: dojot
+subjects:
+- kind: ServiceAccount
+  name: rabbitmq
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: endpoint-reader
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: dojot
+  name: rabbitmq
+  labels:
+    name: rabbitmq
 spec:
   ports:
-  - port: 5672
+  - name: rabbitmq-http
+    protocol: TCP
+    port: 15672
+    targetPort: 15672
+  - name: rabbitmq-amqp
+    protocol: TCP
+    port: 5672
     targetPort: 5672
   selector:
     name: rabbitmq
 ---
-# TODO: Add persistence
-# TODO: Add clusterization
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  labels:
-    name: rabbitmq
+  name: rabbitmq-config
+  namespace: dojot
+data:
+  enabled_plugins: |
+      [rabbitmq_management, rabbitmq_peer_discovery_k8s].
+
+  rabbitmq.conf: |
+      ## Clustering
+      cluster_formation.peer_discovery_backend  = rabbit_peer_discovery_k8s
+      cluster_formation.k8s.host = kubernetes.default.svc.cluster.local
+      cluster_formation.k8s.address_type = ip
+      cluster_formation.node_cleanup.interval = 10
+      cluster_formation.node_cleanup.only_log_warning = true
+      cluster_partition_handling = autoheal
+      queue_master_locator=min-masters
+      loopback_users.guest = false
+
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
   name: rabbitmq
   namespace: dojot
 spec:
-  replicas: 1
+  serviceName: rabbitmq
+  replicas: 3
   template:
     metadata:
       labels:
         name: rabbitmq
     spec:
+      serviceAccountName: rabbitmq
+      terminationGracePeriodSeconds: 10
       containers:
-      - image: rabbitmq
-        name: rabbitmq
+      - name: rabbitmq
+        image: rabbitmq:3.7
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/rabbitmq
         ports:
-        - containerPort: 5672
-      restartPolicy: Always
+        - name: http
+          protocol: TCP
+          containerPort: 15672
+        - name: amqp
+          protocol: TCP
+          containerPort: 5672
+        livenessProbe:
+          exec:
+            command: ["rabbitmqctl", "status"]
+          initialDelaySeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          exec:
+            command: ["rabbitmqctl", "status"]
+          initialDelaySeconds: 10
+          timeoutSeconds: 10
+        imagePullPolicy: Always
+        env:
+          - name: MY_POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: RABBITMQ_USE_LONGNAME
+            value: "true"
+          - name: RABBITMQ_NODENAME
+            value: "rabbit@$(MY_POD_IP)"
+          - name: K8S_SERVICE_NAME
+            value: "rabbitmq"
+          # TODO: Set this cookie as a secret
+          - name: RABBITMQ_ERLANG_COOKIE
+            value: "mycookie"
+      volumes:
+      - name: config-volume
+        configMap:
+          name: rabbitmq-config
+          items:
+          - key: rabbitmq.conf
+            path: rabbitmq.conf
+          - key: enabled_plugins
+            path: enabled_plugins

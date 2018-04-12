@@ -32,7 +32,7 @@ spec:
         env:
         - name: FALCON_SETTINGS_MODULE
           value: history.settings.docker
-        - name: REPLICA_SET
+        - name: MONGO_REPLICA_SET
           value: rs0
         - name: KAFKA_HOST
           value: kafka-server:9092
@@ -58,7 +58,7 @@ spec:
         env:
         - name: FALCON_SETTINGS_MODULE
           value: history.settings.docker
-        - name: REPLICA_SET
+        - name: MONGO_REPLICA_SET
           value: rs0
         - name: KAFKA_HOST
           value: kafka-server:9092

@@ -294,10 +294,12 @@ class KubeDeployer:
                                                     devm_doc['spec'])
                 elif devm_doc['kind'] == 'Deployment':
 
-                    image = devm_doc['spec']['template']['spec']['containers'][0]['image'].replace(
-                        'latest', self.config.get_config_data('version'))
+                    if devm_doc['metadata']['name'] == "device-manager":
+                        image = devm_doc['spec']['template']['spec']['containers'][0]['image']
 
-                    devm_doc['spec']['template']['spec']['containers'][0]['image'] = image
+                        image = image.replace('latest', self.config.get_config_data('version'))
+
+                        devm_doc['spec']['template']['spec']['containers'][0]['image'] = image
 
                     self.kube_client.create_deployment(devm_doc['metadata']['name'], namespace,
                                                        devm_doc['spec'])
@@ -420,19 +422,33 @@ class KubeDeployer:
                 else:
                     logger.error("Invalid document on Auth manifest: %s" % auth_doc['kind'])
 
-    # TODO: Clusterize rabbitmq
-    # TODO: Add persistence to rabbit
+    # TODO: Make cluster size configurable
     def deploy_rabbitmq(self, namespace):
         with open('manifests/rabbitmq.yaml', 'r') as rabbit_docs:
 
             for rabbit_doc in yaml.load_all(rabbit_docs):
-                if rabbit_doc['kind'] == 'Service':
+
+                if rabbit_doc['kind'] == 'ServiceAccount':
+                    self.kube_client.create_service_account(
+                        rabbit_doc['metadata']['name'], namespace)
+                elif rabbit_doc['kind'] == 'Role':
+                    self.kube_client.create_role(rabbit_doc['metadata']['name'], namespace,
+                                                 rabbit_doc['rules'])
+                elif rabbit_doc['kind'] == 'RoleBinding':
+                    self.kube_client.create_role_binding(rabbit_doc['metadata']['name'],
+                                                         namespace,
+                                                         rabbit_doc['subjects'],
+                                                         rabbit_doc['roleRef']['name'])
+                elif rabbit_doc['kind'] == 'ConfigMap':
+                    self.kube_client.create_config_map(rabbit_doc['metadata']['name'], namespace,
+                                                       rabbit_doc['data'])
+                elif rabbit_doc['kind'] == 'Service':
                     self.kube_client.create_service(rabbit_doc['metadata']['name'], namespace,
                                                     rabbit_doc['spec'])
-                elif rabbit_doc['kind'] == 'Deployment':
+                elif rabbit_doc['kind'] == 'StatefulSet':
 
-                    self.kube_client.create_deployment(rabbit_doc['metadata']['name'], namespace,
-                                                       rabbit_doc['spec'])
+                    self.kube_client.create_stateful_set(rabbit_doc['metadata']['name'], namespace,
+                                                         rabbit_doc['spec'])
                 else:
                     logger.error("Invalid document on RabbitMQ manifest: %s" % rabbit_doc['kind'])
 
@@ -537,7 +553,7 @@ class KubeDeployer:
                             ma_doc['spec']['template']['spec']['containers'][0]['image'].replace(
                                 'latest', self.config.get_config_data('version'))
 
-                        ma_doc['spec']['template']['spec']['containers'][0]['image'] = img
+                        # ma_doc['spec']['template']['spec']['containers'][0]['image'] = img
 
                     self.kube_client.create_deployment(ma_doc['metadata']['name'], namespace,
                                                        ma_doc['spec'])
@@ -625,7 +641,7 @@ class KubeDeployer:
                 else:
                     logger.error("Invalid document on EJBCA manifest: %s" %
                                  ejbca_doc['kind'])
-                    
+
     def deploy_alarm_manager(self, namespace):
 
         # TODO: Mount the alarm metamodel files
