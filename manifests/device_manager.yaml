@@ -36,3 +36,36 @@ spec:
         - name: KAFKA_HOST
           value: "kafka-server"
       restartPolicy: Always
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: device-manager-redis
+  name: device-manager-redis
+  namespace: dojot
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: device-manager-redis
+    spec:
+      containers:
+      - image: redis
+        name: device-manager-redis
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: device-manager-redis
+  name: device-manager-redis
+  namespace: dojot
+spec:
+  ports:
+  - port: 6379
+    targetPort: 6379
+  selector:
+    name: device-manager-redis
