@@ -1,0 +1,100 @@
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: mongocfg
+  namespace: dojot
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: mongocfg-role
+  namespace: dojot
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: mongocfg-role-binding
+  namespace: dojot
+subjects:
+- kind: ServiceAccount
+  name: mongocfg
+  namespace: dojot
+roleRef:
+  kind: Role
+  name: mongocfg-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongocfg
+  labels:
+    app: mongocfg
+  namespace: dojot
+spec:
+  clusterIP: None
+  ports:
+  - port: 27019
+    targetPort: 27019
+    name: mongocfg
+  selector:
+    app: mongocfg
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongocfg
+  namespace: dojot
+spec:
+  selector:
+    matchLabels:
+      app: mongocfg
+  serviceName: "mongocfg"
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: mongocfg
+    spec:
+      terminationGracePeriodSeconds: 15
+      containers:
+      - name: mongocfg
+        image: mongo:4.0.0
+        command:
+        - mongod
+        - "--configsvr"
+        - "--replSet"
+        - configReplSet
+        - "--bind_ip"
+        - 0.0.0.0
+        ports:
+        - containerPort: 27019
+          name: mongocfg
+        # volumeMounts:
+        #   - name: mongo-volume
+        #     mountPath: /data/db
+      - name: mongo-sidecar
+        image: cvallance/mongo-k8s-sidecar
+        env:
+        - name: MONGO_SIDECAR_POD_LABELS
+          value: "app=mongocfg"
+        - name: KUBE_NAMESPACE
+          value: dojot
+        - name: CONFIG_SVR
+          value: 'true'
+        - name: MONGO_PORT
+          value: '27019'
+      serviceAccountName: mongocfg
+  # volumeClaimTemplates:
+  # - metadata:
+  #     name: mongo-volume
+  #   spec:
+  #     accessModes: [ "ReadWriteOnce" ]
+  #     storageClassName: dojot
+  #     resources:
+  #       requests:
+  #         storage: 1Gi
