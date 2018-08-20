@@ -56,10 +56,10 @@ spec:
       - image: dojot/persister:latest
         name: persister
         env:
-        - name: MONGO_SHARD
-          value: "true"
         - name: FALCON_SETTINGS_MODULE
           value: history.settings.docker
-        - name: KAFKA_ADDRESS
-          value: kafka-server
+        - name: MONGO_REPLICA_SET
+          value: rs0
+        - name: KAFKA_HOST
+          value: kafka-server:9092
       restartPolicy: Always
