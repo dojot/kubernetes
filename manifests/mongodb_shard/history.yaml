@@ -58,8 +58,8 @@ spec:
         env:
         - name: FALCON_SETTINGS_MODULE
           value: history.settings.docker
-        - name: MONGO_REPLICA_SET
-          value: rs0
-        - name: KAFKA_HOST
-          value: kafka-server:9092
+        - name: KAFKA_ADDRESS
+          value: kafka-server
+        - name: MONGO_SHARD
+          value: "true"
       restartPolicy: Always
