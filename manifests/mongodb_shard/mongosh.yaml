@@ -1,0 +1,100 @@
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: mongosh0
+  namespace: dojot
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: mongosh0-role
+  namespace: dojot
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: mongosh0-role-binding
+  namespace: dojot
+subjects:
+- kind: ServiceAccount
+  name: mongosh0
+  namespace: dojot
+roleRef:
+  kind: Role
+  name: mongosh0-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongosh0
+  labels:
+    app: mongosh0
+  namespace: dojot
+spec:
+  clusterIP: None
+  ports:
+  - port: 27018
+    targetPort: 27018
+    name: mongosh0
+  selector:
+    app: mongosh0
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongosh0
+  namespace: dojot
+spec:
+  selector:
+    matchLabels:
+      app: mongosh0
+  serviceName: "mongosh0"
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: mongosh0
+    spec:
+      terminationGracePeriodSeconds: 15
+      containers:
+      - name: mongosh0
+        image: mongo:4.0.0
+        command:
+        - mongod
+        - "--replSet"
+        - rs0
+        - "--bind_ip"
+        - 0.0.0.0
+        - "--shardsvr"
+        - "--smallfiles"
+        - "--noprealloc"
+        ports:
+        - containerPort: 27018
+          name: mongosh0
+        # volumeMounts:
+        #   - name: mongo-volume
+        #     mountPath: /data/db
+      - name: mongo-sidecar
+        image: cvallance/mongo-k8s-sidecar
+        env:
+        - name: MONGO_SIDECAR_POD_LABELS
+          value: "app=mongosh0"
+        - name: KUBE_NAMESPACE
+          value: dojot
+        - name: MONGO_PORT
+          value: '27018'
+      serviceAccountName: mongosh0
+  # volumeClaimTemplates:
+  # - metadata:
+  #     name: mongo-volume
+  #   spec:
+  #     accessModes: [ "ReadWriteOnce" ]
+  #     storageClassName: dojot
+  #     resources:
+  #       requests:
+  #         storage: 1Gi
